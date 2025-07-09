@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crawl Results - Web Scraper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .crawl-summary {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .summary-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-failed {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-success {
+            background: #059669;
+        }
+        
+        .results-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .result-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .result-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .result-header {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .result-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .result-url {
+            font-size: 14px;
+            color: #4f46e5;
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 10px;
+        }
+        
+        .result-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .result-content {
+            padding: 20px;
+        }
+        
+        .result-description {
+            color: #4b5563;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .content-preview {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #374151;
+        }
+        
+        .expand-toggle {
+            margin-top: 10px;
+            color: #4f46e5;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .expand-toggle:hover {
+            text-decoration: underline;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .pagination button:hover {
+            background: #f3f4f6;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination .current {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .back-button {
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-filter {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                min-width: auto;
+            }
+            
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ Crawl Results</h1>
+            <p>Multi-page scraping results</p>
+        </div>
+        
+        <div class="content">
+            <div class="back-button">
+                <a href="/" class="btn btn-secondary">← Back to Scraper</a>
+            </div>
+            
+            <div class="crawl-summary">
+                <div class="summary-header">
+                    <h2 class="summary-title">Crawl Summary</h2>
+                    <span class="status-badge status-{{ status.status }}">{{ status.status }}</span>
+                </div>
+                
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ total_pages }}</div>
+                        <div class="stat-label">Pages Scraped</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ results|selectattr('success')|list|length }}</div>
+                        <div class="stat-label">Successful</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ (results|map(attribute='word_count')|sum) or 0 }}</div>
+                        <div class="stat-label">Total Words</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ (results|map(attribute='links')|map('length')|sum) or 0 }}</div>
+                        <div class="stat-label">Total Links</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if results %}
+            <div class="controls">
+                <div class="search-filter">
+                    <input type="text" class="search-box" id="searchBox" placeholder="Search pages by title or URL...">
+                    <select class="filter-select" id="filterSelect">
+                        <option value="all">All Pages</option>
+                        <option value="success">Successful Only</option>
+                        <option value="failed">Failed Only</option>
+                    </select>
+                </div>
+                
+                <div class="export-buttons">
+                    <button class="btn btn-success" onclick="exportResults('csv')">📊 Export CSV</button>
+                    <button class="btn btn-success" onclick="exportResults('json')">📁 Export JSON</button>
+                    <button class="btn btn-success" onclick="exportMarkdown()">📝 Export Markdown</button>
+                    <button class="btn btn-success" onclick="copyAllMarkdown()">📋 Copy All Markdown</button>
+                </div>
+            </div>
+            
+            <div class="results-grid" id="resultsGrid">
+                {% for result in results %}
+                <div class="result-card" data-title="{{ result.title|lower }}" data-url="{{ result.url|lower }}" data-success="{{ result.success }}">
+                    <div class="result-header">
+                        {% if result.success %}
+                            <h3 class="result-title">{{ result.title or "Untitled Page" }}</h3>
+                            <div class="result-url">🔗 {{ result.url }}</div>
+                            <div class="result-meta">
+                                <span>📊 {{ result.word_count }} words</span>
+                                <span>🔗 {{ result.links|length }} links</span>
+                                {% if result.depth is defined %}
+                                <span>📏 Depth {{ result.depth }}</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <h3 class="result-title">❌ Failed to scrape</h3>
+                            <div class="result-url">🔗 {{ result.url }}</div>
+                            <div class="result-meta">
+                                <span style="color: #dc2626;">Error: {{ result.error or "Unknown error" }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if result.success %}
+                    <div class="result-content">
+                        {% if result.description %}
+                        <div class="result-description">{{ result.description }}</div>
+                        {% endif %}
+                        
+                        <div class="content-preview" id="preview-{{ loop.index }}">
+                            {{ (result.markdown[:500] + '...') if result.markdown and result.markdown|length > 500 else (result.markdown or "No content extracted") }}
+                        </div>
+                        
+                        {% if result.markdown and result.markdown|length > 500 %}
+                        <div class="expand-toggle" onclick="toggleExpand({{ loop.index }})">
+                            <span id="toggle-text-{{ loop.index }}">▼ Show full content</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="pagination" id="pagination"></div>
+            
+            {% else %}
+            <div class="no-results">
+                <div class="no-results-icon">🔍</div>
+                <h3>No results found</h3>
+                <p>The crawl completed but no pages were successfully scraped.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        const allResults = {{ results|tojson }};
+        const currentPage = 1;
+        const resultsPerPage = 10;
+        let filteredResults = allResults;
+        
+        // Search and filter functionality
+        document.getElementById('searchBox').addEventListener('input', filterResults);
+        document.getElementById('filterSelect').addEventListener('change', filterResults);
+        
+        function filterResults() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filterType = document.getElementById('filterSelect').value;
+            
+            const cards = document.querySelectorAll('.result-card');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title') || '';
+                const url = card.getAttribute('data-url') || '';
+                const isSuccess = card.getAttribute('data-success') === 'True';
+                
+                let matchesSearch = title.includes(searchTerm) || url.includes(searchTerm);
+                let matchesFilter = filterType === 'all' || 
+                                  (filterType === 'success' && isSuccess) || 
+                                  (filterType === 'failed' && !isSuccess);
+                
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show no results message if needed
+            const noResults = document.querySelector('.no-results');
+            if (visibleCount === 0 && allResults.length > 0) {
+                if (!noResults) {
+                    const message = document.createElement('div');
+                    message.className = 'no-results';
+                    message.innerHTML = '<div class="no-results-icon">🔍</div><h3>No matching results</h3><p>Try adjusting your search or filter criteria.</p>';
+                    document.getElementById('resultsGrid').after(message);
+                }
+            } else if (noResults) {
+                noResults.remove();
+            }
+        }
+        
+        // Toggle content expansion
+        function toggleExpand(index) {
+            const preview = document.getElementById(`preview-${index}`);
+            const toggleText = document.getElementById(`toggle-text-${index}`);
+            const result = allResults[index - 1];
+            
+            if (preview.style.maxHeight === 'none') {
+                preview.innerHTML = (result.markdown.substring(0, 500) + '...');
+                preview.style.maxHeight = '200px';
+                toggleText.textContent = '▼ Show full content';
+            } else {
+                preview.innerHTML = result.markdown || 'No content extracted';
+                preview.style.maxHeight = 'none';
+                toggleText.textContent = '▲ Show less';
+            }
+        }
+        
+        // Export functionality
+        function exportResults(format) {
+            const exportData = allResults.filter(result => result.success);
+            
+            if (format === 'csv') {
+                exportCSV(exportData);
+            } else if (format === 'json') {
+                exportJSON(exportData);
+            }
+        }
+        
+        function exportCSV(data) {
+            const headers = ['URL', 'Title', 'Description', 'Word Count', 'Links Count'];
+            const csvContent = [
+                headers.join(','),
+                ...data.map(result => [
+                    `"${result.url}"`,
+                    `"${(result.title || '').replace(/"/g, '""')}"`,
+                    `"${(result.description || '').replace(/"/g, '""')}"`,
+                    result.word_count || 0,
+                    (result.links || []).length
+                ].join(','))
+            ].join('\\n');
+            
+            downloadFile(csvContent, 'crawl-results.csv', 'text/csv');
+        }
+        
+        function exportJSON(data) {
+            const jsonContent = JSON.stringify(data, null, 2);
+            downloadFile(jsonContent, 'crawl-results.json', 'application/json');
+        }
+        
+        function exportMarkdown() {
+            const exportData = allResults.filter(result => result.success);
+            let markdownContent = '# Web Scraping Results\n\n';
+            
+            exportData.forEach((result, index) => {
+                markdownContent += `## ${index + 1}. ${result.title || 'Untitled Page'}\n\n`;
+                markdownContent += `**URL:** ${result.url}\n\n`;
+                if (result.description) {
+                    markdownContent += `**Description:** ${result.description}\n\n`;
+                }
+                markdownContent += `**Word Count:** ${result.word_count || 0}\n\n`;
+                markdownContent += `**Links Found:** ${(result.links || []).length}\n\n`;
+                if (result.depth !== undefined) {
+                    markdownContent += `**Crawl Depth:** ${result.depth}\n\n`;
+                }
+                markdownContent += '### Content\n\n';
+                markdownContent += result.markdown || 'No content extracted';
+                markdownContent += '\n\n---\n\n';
+            });
+            
+            downloadFile(markdownContent, 'crawl-results.md', 'text/markdown');
+        }
+        
+        function copyAllMarkdown() {
+            const exportData = allResults.filter(result => result.success);
+            let markdownContent = '# Web Scraping Results\n\n';
+            
+            exportData.forEach((result, index) => {
+                markdownContent += `## ${index + 1}. ${result.title || 'Untitled Page'}\n\n`;
+                markdownContent += `**URL:** ${result.url}\n\n`;
+                if (result.description) {
+                    markdownContent += `**Description:** ${result.description}\n\n`;
+                }
+                markdownContent += `**Word Count:** ${result.word_count || 0}\n\n`;
+                markdownContent += `**Links Found:** ${(result.links || []).length}\n\n`;
+                if (result.depth !== undefined) {
+                    markdownContent += `**Crawl Depth:** ${result.depth}\n\n`;
+                }
+                markdownContent += '### Content\n\n';
+                markdownContent += result.markdown || 'No content extracted';
+                markdownContent += '\n\n---\n\n';
+            });
+            
+            navigator.clipboard.writeText(markdownContent).then(() => {
+                // Show temporary success message
+                const originalText = event.target.textContent;
+                event.target.textContent = '✅ Copied to Clipboard!';
+                event.target.style.backgroundColor = '#059669';
+                
+                setTimeout(() => {
+                    event.target.textContent = originalText;
+                    event.target.style.backgroundColor = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy to clipboard:', err);
+                // Fallback: create a textarea and select the content
+                const textarea = document.createElement('textarea');
+                textarea.value = markdownContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                // Show success message
+                const originalText = event.target.textContent;
+                event.target.textContent = '✅ Copied to Clipboard!';
+                event.target.style.backgroundColor = '#059669';
+                
+                setTimeout(() => {
+                    event.target.textContent = originalText;
+                    event.target.style.backgroundColor = '';
+                }, 2000);
+            });
+        }
+        
+        function downloadFile(content, filename, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus search box for immediate use
+            document.getElementById('searchBox').focus();
+        });
+    </script>
+</body>
+</html>

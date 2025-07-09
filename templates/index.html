@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Scraper - Crew4AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .result-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .result-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+            color: #6b7280;
+        }
+        
+        .stat {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .result-meta {
+            margin-bottom: 20px;
+        }
+        
+        .meta-item {
+            margin-bottom: 10px;
+        }
+        
+        .meta-label {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .meta-value {
+            color: #6b7280;
+        }
+        
+        .markdown-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .url-display {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+        
+        .advanced-options {
+            margin-top: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .advanced-header {
+            background: #f9fafb;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background-color 0.2s ease;
+        }
+        
+        .advanced-header:hover {
+            background: #f3f4f6;
+        }
+        
+        .advanced-title {
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chevron {
+            transition: transform 0.2s ease;
+        }
+        
+        .chevron.expanded {
+            transform: rotate(180deg);
+        }
+        
+        .advanced-content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .advanced-content.expanded {
+            display: block;
+        }
+        
+        .crawl-modes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .crawl-mode {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .crawl-mode:hover {
+            border-color: #c7d2fe;
+            background: #f8fafc;
+        }
+        
+        .crawl-mode.selected {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+        
+        .crawl-mode input[type="radio"] {
+            margin-right: 10px;
+        }
+        
+        .mode-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .mode-description {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+        
+        .config-panel {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .config-panel.active {
+            display: block;
+        }
+        
+        .config-group {
+            margin-bottom: 15px;
+        }
+        
+        .config-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .config-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: #4f46e5;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+        
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+        
+        .info-tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 5px;
+            cursor: help;
+        }
+        
+        .info-tooltip::after {
+            content: '?';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #6b7280;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 12px;
+            line-height: 16px;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .progress-container.active {
+            display: block;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ Web Scraper</h1>
+            <p>Powered by Crew4AI & Crawl4AI</p>
+        </div>
+        
+        <div class="content">
+            {% if error %}
+            <div class="alert alert-error">
+                <strong>Error:</strong> {{ error }}
+            </div>
+            {% endif %}
+            
+            <form action="/scrape-form" method="post" id="scrapeForm">
+                <div class="form-group">
+                    <label for="url">Enter URL to scrape:</label>
+                    <input type="url" 
+                           id="url" 
+                           name="url" 
+                           placeholder="https://example.com" 
+                           required
+                           {% if url %}value="{{ url }}"{% endif %}>
+                </div>
+                
+                <div class="advanced-options">
+                    <div class="advanced-header" onclick="toggleAdvanced()">
+                        <div class="advanced-title">
+                            ⚙️ Advanced Crawling Options
+                        </div>
+                        <div class="chevron" id="chevron">▼</div>
+                    </div>
+                    
+                    <div class="advanced-content" id="advancedContent">
+                        <div class="crawl-modes">
+                            <div class="crawl-mode selected" onclick="selectMode('single')">
+                                <div class="mode-title">
+                                    <input type="radio" name="crawl_mode" value="single" checked>
+                                    🔹 Single Page
+                                </div>
+                                <div class="mode-description">
+                                    Scrape only the specified URL with optional infinite scroll support
+                                </div>
+                            </div>
+                            
+                            <div class="crawl-mode" onclick="selectMode('deep')">
+                                <div class="mode-title">
+                                    <input type="radio" name="crawl_mode" value="deep">
+                                    🕷️ Deep Crawl
+                                </div>
+                                <div class="mode-description">
+                                    Follow internal links with depth limits
+                                </div>
+                            </div>
+                            
+                            <div class="crawl-mode" onclick="selectMode('sitemap')">
+                                <div class="mode-title">
+                                    <input type="radio" name="crawl_mode" value="sitemap">
+                                    🗺️ Sitemap Crawl
+                                </div>
+                                <div class="mode-description">
+                                    Extract all URLs from sitemap.xml (will try common locations if not found)
+                                </div>
+                            </div>
+                            
+                            <div class="crawl-mode" onclick="selectMode('pattern')">
+                                <div class="mode-title">
+                                    <input type="radio" name="crawl_mode" value="pattern">
+                                    🎯 Pattern-Based
+                                </div>
+                                <div class="mode-description">
+                                    Follow URLs matching custom patterns
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Single Page Configuration -->
+                        <div class="config-panel active" id="singleConfig">
+                            <div class="config-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" name="enable_infinite_scroll" id="infiniteScroll" onchange="toggleScrollOptions()">
+                                    <label for="infiniteScroll" class="config-label">Enable Infinite Scroll <span class="info-tooltip" title="Automatically scroll down to load dynamic content and lazy-loaded elements"></span></label>
+                                </div>
+                            </div>
+                            
+                            <div class="config-group" id="scrollOptions" style="display: none;">
+                                <div class="config-group">
+                                    <label class="config-label">
+                                        Max Scrolls <span class="info-tooltip" title="Maximum number of scroll attempts (prevents infinite loops)"></span>
+                                    </label>
+                                    <div class="slider-container">
+                                        <input type="range" class="slider" name="max_scrolls" min="3" max="50" value="10" onchange="updateSliderValue('scrolls', this.value)">
+                                        <div class="slider-value" id="scrollsValue">10</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="config-group">
+                                    <label class="config-label">
+                                        Scroll Delay (ms) <span class="info-tooltip" title="Time to wait after each scroll for content to load"></span>
+                                    </label>
+                                    <div class="slider-container">
+                                        <input type="range" class="slider" name="scroll_delay" min="500" max="5000" value="2000" onchange="updateSliderValue('scrollDelay', this.value)">
+                                        <div class="slider-value" id="scrollDelayValue">2000</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="config-group">
+                                    <label class="config-label">
+                                        Scroll Step (px) <span class="info-tooltip" title="Distance to scroll down on each step"></span>
+                                    </label>
+                                    <div class="slider-container">
+                                        <input type="range" class="slider" name="scroll_step" min="500" max="2000" value="1000" onchange="updateSliderValue('scrollStep', this.value)">
+                                        <div class="slider-value" id="scrollStepValue">1000</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="config-group">
+                                    <label class="config-label">
+                                        Content Stability Checks <span class="info-tooltip" title="Number of consecutive checks with no new content before stopping"></span>
+                                    </label>
+                                    <div class="slider-container">
+                                        <input type="range" class="slider" name="content_stability_checks" min="1" max="10" value="3" onchange="updateSliderValue('stability', this.value)">
+                                        <div class="slider-value" id="stabilityValue">3</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 15px; padding: 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #0c4a6e;">
+                                        🎯 Advanced Options
+                                    </div>
+                                    
+                                    <div class="config-group">
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" name="youtube_optimized" id="youtubeOptimized" checked>
+                                            <label for="youtubeOptimized" class="config-label">YouTube Optimization <span class="info-tooltip" title="Automatically optimize for YouTube channels and playlists with specialized selectors and timing"></span></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="config-group">
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" name="human_behavior_simulation" id="humanBehavior" checked>
+                                            <label for="humanBehavior" class="config-label">Human Behavior Simulation <span class="info-tooltip" title="Randomize scroll timing and patterns to mimic natural user behavior and avoid detection"></span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Deep Crawl Configuration -->
+                        <div class="config-panel" id="deepConfig">
+                            <div class="config-group">
+                                <label class="config-label">
+                                    Max Depth <span class="info-tooltip" title="How many levels deep to crawl from the starting URL"></span>
+                                </label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" name="max_depth" min="1" max="5" value="2" onchange="updateSliderValue('depth', this.value)">
+                                    <div class="slider-value" id="depthValue">2</div>
+                                </div>
+                            </div>
+                            
+                            <div class="config-group">
+                                <label class="config-label">
+                                    Max Pages <span class="info-tooltip" title="Maximum number of pages to scrape"></span>
+                                </label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" name="max_pages" min="5" max="100" value="20" onchange="updateSliderValue('pages', this.value)">
+                                    <div class="slider-value" id="pagesValue">20</div>
+                                </div>
+                            </div>
+                            
+                            <div class="config-group">
+                                <label class="config-label">
+                                    Crawl Delay (seconds) <span class="info-tooltip" title="Delay between requests to be respectful to the server"></span>
+                                </label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" name="crawl_delay" min="1" max="10" value="2" onchange="updateSliderValue('delay', this.value)">
+                                    <div class="slider-value" id="delayValue">2</div>
+                                </div>
+                            </div>
+                            
+                            <div class="config-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" name="same_domain" id="sameDomain" checked>
+                                    <label for="sameDomain" class="config-label">Stay within same domain</label>
+                                </div>
+                            </div>
+                            
+                            <div class="config-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" name="include_external" id="includeExternal">
+                                    <label for="includeExternal" class="config-label">Include external links</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sitemap Configuration -->
+                        <div class="config-panel" id="sitemapConfig">
+                            <div class="config-group">
+                                <label class="config-label">Custom Sitemap URL (optional)</label>
+                                <input type="text" name="sitemap_url" placeholder="https://example.com/sitemap.xml">
+                            </div>
+                            
+                            <div class="config-group">
+                                <label class="config-label">
+                                    Max URLs from Sitemap
+                                </label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" name="sitemap_max" min="10" max="500" value="50" onchange="updateSliderValue('sitemap', this.value)">
+                                    <div class="slider-value" id="sitemapValue">50</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pattern Configuration -->
+                        <div class="config-panel" id="patternConfig">
+                            <div class="config-group">
+                                <label class="config-label">URL Pattern (regex)</label>
+                                <input type="text" name="url_pattern" placeholder=".*\/blog\/.*" value=".*">
+                            </div>
+                            
+                            <div class="config-group">
+                                <label class="config-label">Exclude Pattern (optional)</label>
+                                <input type="text" name="exclude_pattern" placeholder=".*\/(admin|login).*">
+                            </div>
+                        </div>
+                        
+                        <!-- Ethical Crawling Notice -->
+                        <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; font-size: 14px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #92400e;">
+                                ⚖️ Ethical Crawling Notice
+                            </div>
+                            <div style="color: #92400e; line-height: 1.4;">
+                                This tool automatically respects robots.txt files and implements crawl delays for responsible web scraping. 
+                                Please ensure you have permission to scrape the target website and comply with their terms of service.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-text" id="progressText">Initializing crawl...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span id="progressPages">Pages: 0/0</span>
+                        <span id="progressTime">Time: 0s</span>
+                        <span id="progressSpeed">Speed: 0 pages/min</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="submit" class="btn" id="submitBtn">
+                        🚀 Start Scraping
+                    </button>
+                    
+                    <button type="button" class="btn" id="viewResultsBtn" style="background: #059669; display: none;" onclick="viewLastResults()">
+                        📊 View Results
+                    </button>
+                </div>
+            </form>
+            
+            {% if result %}
+            <div class="results">
+                {% if result.success %}
+                <div class="alert alert-success">
+                    ✅ Successfully scraped the website!
+                </div>
+                
+                <div class="result-header">
+                    <h2 class="result-title">{{ result.title or "Scraped Content" }}</h2>
+                    <div class="result-stats">
+                        <div class="stat">
+                            <strong>{{ result.word_count }}</strong> words
+                        </div>
+                        <div class="stat">
+                            <strong>{{ result.links|length }}</strong> links
+                        </div>
+                        <div class="stat">
+                            <strong>{{ result.images|length }}</strong> images
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="url-display">
+                    <strong>URL:</strong> {{ result.url }}
+                </div>
+                
+                {% if result.description %}
+                <div class="result-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Description:</span>
+                        <div class="meta-value">{{ result.description }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <h3>📝 Markdown Content:</h3>
+                <div class="markdown-content">{{ result.markdown or "No content extracted" }}</div>
+                
+                {% else %}
+                <div class="alert alert-error">
+                    ❌ Scraping failed: {{ result.error }}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        // Toggle advanced options
+        function toggleAdvanced() {
+            const content = document.getElementById('advancedContent');
+            const chevron = document.getElementById('chevron');
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                chevron.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                chevron.classList.add('expanded');
+            }
+        }
+        
+        // Select crawling mode
+        function selectMode(mode) {
+            // Update radio buttons and visual selection
+            document.querySelectorAll('.crawl-mode').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('input[name="crawl_mode"]').forEach(el => el.checked = false);
+            
+            const selectedMode = document.querySelector(`input[value="${mode}"]`);
+            selectedMode.checked = true;
+            selectedMode.closest('.crawl-mode').classList.add('selected');
+            
+            // Show/hide config panels
+            document.querySelectorAll('.config-panel').forEach(panel => panel.classList.remove('active'));
+            
+            if (mode === 'single') {
+                document.getElementById('singleConfig').classList.add('active');
+            } else if (mode === 'deep') {
+                document.getElementById('deepConfig').classList.add('active');
+            } else if (mode === 'sitemap') {
+                document.getElementById('sitemapConfig').classList.add('active');
+            } else if (mode === 'pattern') {
+                document.getElementById('patternConfig').classList.add('active');
+            }
+        }
+        
+        // Update slider values
+        function updateSliderValue(type, value) {
+            document.getElementById(type + 'Value').textContent = value;
+        }
+        
+        // Handle infinite scroll checkbox
+        function toggleScrollOptions() {
+            const checkbox = document.getElementById('infiniteScroll');
+            const scrollOptions = document.getElementById('scrollOptions');
+            
+            if (checkbox.checked) {
+                scrollOptions.style.display = 'block';
+            } else {
+                scrollOptions.style.display = 'none';
+            }
+        }
+        
+        // Form submission with progress
+        document.getElementById('scrapeForm').addEventListener('submit', function(e) {
+            const button = document.getElementById('submitBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const mode = document.querySelector('input[name="crawl_mode"]:checked').value;
+            
+            if (mode === 'single') {
+                // Simple single page scraping
+                button.innerHTML = '<div class="spinner"></div> Scraping...';
+                button.disabled = true;
+            } else {
+                // Multi-page crawling with progress
+                e.preventDefault();
+                startAdvancedCrawl();
+            }
+        });
+        
+        // Advanced crawling with progress tracking
+        function startAdvancedCrawl() {
+            const button = document.getElementById('submitBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressText = document.getElementById('progressText');
+            const progressFill = document.getElementById('progressFill');
+            const progressPages = document.getElementById('progressPages');
+            const progressTime = document.getElementById('progressTime');
+            const progressSpeed = document.getElementById('progressSpeed');
+            const viewResultsBtn = document.getElementById('viewResultsBtn');
+            
+            // Hide results button and show progress container
+            if (viewResultsBtn) {
+                viewResultsBtn.style.display = 'none';
+            }
+            progressContainer.classList.add('active');
+            button.innerHTML = '⏹️ Cancel Crawl';
+            button.onclick = cancelCrawl;
+            
+            // Collect form data
+            const formData = new FormData(document.getElementById('scrapeForm'));
+            const data = Object.fromEntries(formData);
+            
+            // Start crawl via API
+            fetch('/crawl/advanced', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.job_id) {
+                    trackProgress(result.job_id);
+                } else {
+                    showError('Failed to start crawl: ' + (result.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                showError('Network error: ' + error.message);
+            });
+        }
+        
+        let websocket = null;
+        let startTime = Date.now();
+        let fallbackInterval = null;
+        let completionTimeout = null;
+        
+        // Track crawling progress via WebSocket
+        function trackProgress(jobId) {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/progress/${jobId}`;
+            
+            websocket = new WebSocket(wsUrl);
+            
+            // Set up completion timeout (5 minutes of no updates)
+            resetCompletionTimeout(jobId);
+            
+            websocket.onopen = function(event) {
+                console.log('WebSocket connected for job:', jobId);
+            };
+            
+            websocket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('WebSocket message received:', data);
+                    
+                    if (data.type === 'progress') {
+                        updateProgress(data);
+                        resetCompletionTimeout(jobId);
+                        
+                        if (data.status === 'completed') {
+                            console.log('Crawl completed, showing results...');
+                            websocket.close();
+                            clearTimeouts();
+                            showResults(jobId);
+                        } else if (data.status === 'failed') {
+                            console.log('Crawl failed:', data.error);
+                            websocket.close();
+                            clearTimeouts();
+                            showError('Crawl failed: ' + (data.error || 'Unknown error'));
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error parsing WebSocket message:', error);
+                }
+            };
+            
+            websocket.onerror = function(event) {
+                console.error('WebSocket error:', event);
+                // Fallback to polling if WebSocket fails
+                trackProgressFallback(jobId);
+            };
+            
+            websocket.onclose = function(event) {
+                console.log('WebSocket closed for job:', jobId);
+                // Start fallback polling if not manually closed
+                if (event.code !== 1000) {
+                    setTimeout(() => trackProgressFallback(jobId), 1000);
+                }
+            };
+        }
+        
+        // Reset the completion timeout
+        function resetCompletionTimeout(jobId) {
+            if (completionTimeout) {
+                clearTimeout(completionTimeout);
+            }
+            
+            completionTimeout = setTimeout(() => {
+                console.log('No progress updates for 5 minutes, checking completion status...');
+                checkCompletionStatus(jobId);
+            }, 300000); // 5 minutes
+        }
+        
+        // Clear all timeouts
+        function clearTimeouts() {
+            if (completionTimeout) {
+                clearTimeout(completionTimeout);
+                completionTimeout = null;
+            }
+            if (fallbackInterval) {
+                clearInterval(fallbackInterval);
+                fallbackInterval = null;
+            }
+        }
+        
+        // Check if crawl is actually completed
+        function checkCompletionStatus(jobId) {
+            fetch(`/crawl/status/${jobId}`)
+            .then(response => response.json())
+            .then(status => {
+                console.log('Completion check status:', status);
+                if (status.status === 'completed') {
+                    console.log('Crawl was completed, showing results...');
+                    showResults(jobId);
+                } else if (status.status === 'failed') {
+                    showError('Crawl failed: ' + (status.error || 'Unknown error'));
+                } else {
+                    // Still running, continue monitoring
+                    updateProgress(status);
+                    resetCompletionTimeout(jobId);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking completion status:', error);
+                showError('Error checking crawl status: ' + error.message);
+            });
+        }
+        
+        // Fallback polling method
+        function trackProgressFallback(jobId) {
+            console.log('Starting fallback polling for job:', jobId);
+            clearTimeouts();
+            
+            fallbackInterval = setInterval(() => {
+                fetch(`/crawl/status/${jobId}`)
+                .then(response => response.json())
+                .then(status => {
+                    console.log('Fallback polling status:', status);
+                    updateProgress(status);
+                    
+                    if (status.status === 'completed' || status.status === 'failed') {
+                        clearInterval(fallbackInterval);
+                        fallbackInterval = null;
+                        
+                        if (status.status === 'completed') {
+                            console.log('Fallback detected completion, showing results...');
+                            showResults(jobId);
+                        } else {
+                            showError('Crawl failed: ' + (status.error || 'Unknown error'));
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Fallback polling error:', error);
+                    clearInterval(fallbackInterval);
+                    fallbackInterval = null;
+                    showError('Error tracking progress: ' + error.message);
+                });
+            }, 2000); // Poll every 2 seconds
+        }
+        
+        // Update progress display
+        function updateProgress(status) {
+            const progressText = document.getElementById('progressText');
+            const progressFill = document.getElementById('progressFill');
+            const progressPages = document.getElementById('progressPages');
+            const progressTime = document.getElementById('progressTime');
+            const progressSpeed = document.getElementById('progressSpeed');
+            
+            const progress = status.total > 0 ? (status.completed / status.total) * 100 : 0;
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const speed = elapsed > 0 ? Math.round((status.completed / elapsed) * 60) : 0;
+            
+            progressText.textContent = status.message || 'Crawling in progress...';
+            progressFill.style.width = progress + '%';
+            progressPages.textContent = `Pages: ${status.completed}/${status.total}`;
+            progressTime.textContent = `Time: ${elapsed}s`;
+            progressSpeed.textContent = `Speed: ${speed} pages/min`;
+        }
+        
+        // Cancel crawl
+        function cancelCrawl() {
+            clearTimeouts();
+            
+            if (websocket) {
+                websocket.close();
+                websocket = null;
+            }
+            
+            const button = document.getElementById('submitBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            
+            button.innerHTML = '🚀 Start Scraping';
+            button.onclick = null;
+            button.disabled = false;
+            progressContainer.classList.remove('active');
+        }
+        
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-error';
+            errorDiv.innerHTML = '<strong>Error:</strong> ' + message;
+            
+            const content = document.querySelector('.content');
+            content.insertBefore(errorDiv, content.firstChild);
+            
+            // Reset button
+            cancelCrawl();
+        }
+        
+        let lastJobId = null;
+        
+        // Show crawl results
+        function showResults(jobId) {
+            lastJobId = jobId;
+            
+            // Show the manual results button
+            const viewResultsBtn = document.getElementById('viewResultsBtn');
+            if (viewResultsBtn) {
+                viewResultsBtn.style.display = 'inline-block';
+            }
+            
+            // Redirect to results page
+            window.location.href = `/crawl/results/${jobId}/page`;
+        }
+        
+        // Manual view results function
+        function viewLastResults() {
+            if (lastJobId) {
+                window.location.href = `/crawl/results/${lastJobId}/page`;
+            } else {
+                showError('No recent crawl results found');
+            }
+        }
+        
+        // Initialize default mode on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            selectMode('single');
+        });
+    </script>
+</body>
+</html>
