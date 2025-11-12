@@ -480,7 +480,7 @@
             </div>
             {% endif %}
             
-            <form action="/scrape-form" method="post" id="scrapeForm">
+            <form action="#" method="post" id="scrapeForm">
                 <div class="form-group">
                     <label for="company_name">Enter URL to scrape:</label>
                     <input type="text"
@@ -1054,19 +1054,15 @@
         
         // Form submission with progress
         document.getElementById('scrapeForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Always prevent default form submission
             const button = document.getElementById('submitBtn');
             const progressContainer = document.getElementById('progressContainer');
             const mode = document.querySelector('input[name="crawl_mode"]:checked').value;
-            
-            if (mode === 'single') {
-                // Simple single page scraping
-                button.innerHTML = '<div class="spinner"></div> Scraping...';
-                button.disabled = true;
-            } else {
-                // Multi-page crawling with progress
-                e.preventDefault();
-                startAdvancedCrawl();
-            }
+
+            // All modes now use the API
+            button.innerHTML = '<div class="spinner"></div> Scraping...';
+            button.disabled = true;
+            startAdvancedCrawl();
         });
         
         // Advanced crawling with progress tracking
