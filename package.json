@@ -1,0 +1,23 @@
+{
+  "name": "webcrawler",
+  "version": "1.0.0",
+  "description": "This project contains a web crawler designed to extract information from company websites.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericxyz86/web-crawler.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ericxyz86/web-crawler/issues"
+  },
+  "homepage": "https://github.com/ericxyz86/web-crawler#readme",
+  "devDependencies": {
+    "tailwindcss": "^4.1.4"
+  }
+}

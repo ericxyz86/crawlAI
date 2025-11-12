@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: crawlai
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: RENDER
+        value: true
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: SERP_API_KEY
+        sync: false
+      - key: FIRECRAWL_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

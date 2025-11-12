@@ -199,7 +199,12 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
         .url-display {
             background: #f3f4f6;
             padding: 10px;
@@ -477,15 +482,37 @@
             
             <form action="/scrape-form" method="post" id="scrapeForm">
                 <div class="form-group">
-                    <label for="url">Enter URL to scrape:</label>
-                    <input type="url" 
-                           id="url" 
-                           name="url" 
-                           placeholder="https://example.com" 
+                    <label for="company_name">Enter URL to scrape:</label>
+                    <input type="text"
+                           id="company_name"
+                           name="company_name"
+                           placeholder="https://example.com or company name"
                            required
+                           oninput="suggestObjective()"
                            {% if url %}value="{{ url }}"{% endif %}>
                 </div>
-                
+
+                <div class="form-group">
+                    <label for="objective">
+                        Search Objective <span style="color: #6b7280; font-weight: normal; font-size: 14px;">(optional)</span>
+                    </label>
+                    <div style="position: relative;">
+                        <textarea id="objective"
+                                name="objective"
+                                placeholder="e.g., Find product pricing"
+                                rows="2"
+                                style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; font-family: inherit; resize: vertical; transition: border-color 0.2s;"
+                                onfocus="this.style.borderColor='#4f46e5'"
+                                onblur="this.style.borderColor='#e5e7eb'"></textarea>
+                        <div id="objectiveSuggestions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #4f46e5; border-top: none; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); z-index: 10; max-height: 200px; overflow-y: auto;">
+                            <!-- Suggestions will be inserted here -->
+                        </div>
+                    </div>
+                    <div id="objectiveHelp" style="margin-top: 8px; padding: 10px; background: #f0f9ff; border-left: 3px solid #0ea5e9; border-radius: 4px; font-size: 14px; color: #0369a1; display: none;">
+                        💡 <span id="objectiveHelpText"></span>
+                    </div>
+                </div>
+
                 <div class="advanced-options">
                     <div class="advanced-header" onclick="toggleAdvanced()">
                         <div class="advanced-title">
@@ -703,9 +730,9 @@
                 <div class="progress-container" id="progressContainer">
                     <div class="progress-text" id="progressText">Initializing crawl...</div>
                     <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
+                        <div class="progress-fill" id="progressFill" style="width: 100%; animation: pulse 2s ease-in-out infinite;"></div>
                     </div>
-                    <div class="progress-stats">
+                    <div class="progress-stats" style="display: none;">
                         <span id="progressPages">Pages: 0/0</span>
                         <span id="progressTime">Time: 0s</span>
                         <span id="progressSpeed">Speed: 0 pages/min</span>
@@ -815,11 +842,209 @@
             document.getElementById(type + 'Value').textContent = value;
         }
         
+        // Smart objective suggestions based on URL
+        function suggestObjective() {
+            const urlInput = document.getElementById('company_name');
+            const objectiveInput = document.getElementById('objective');
+            const suggestionsDiv = document.getElementById('objectiveSuggestions');
+            const helpDiv = document.getElementById('objectiveHelp');
+            const helpText = document.getElementById('objectiveHelpText');
+
+            const url = urlInput.value.toLowerCase().trim();
+
+            // Don't suggest if user already typed something in objective
+            if (objectiveInput.value.trim() !== '') {
+                suggestionsDiv.style.display = 'none';
+                helpDiv.style.display = 'none';
+                return;
+            }
+
+            if (!url) {
+                suggestionsDiv.style.display = 'none';
+                helpDiv.style.display = 'none';
+                return;
+            }
+
+            // URL pattern matching for smart suggestions
+            const suggestions = [];
+            let helpMessage = '';
+
+            // E-commerce / Shopping sites
+            if (url.match(/shop|store|cart|buy|price|product|ecommerce/i)) {
+                suggestions.push({
+                    text: 'Find product pricing and availability',
+                    icon: '💰'
+                });
+                suggestions.push({
+                    text: 'Extract product specifications and features',
+                    icon: '📋'
+                });
+                suggestions.push({
+                    text: 'Get product reviews and ratings',
+                    icon: '⭐'
+                });
+                helpMessage = 'Detected e-commerce site. Common objectives: pricing, products, reviews.';
+            }
+            // Real estate sites
+            else if (url.match(/realtor|realty|property|housing|apartment|condo/i)) {
+                suggestions.push({
+                    text: 'Find property listings and prices',
+                    icon: '🏠'
+                });
+                suggestions.push({
+                    text: 'Extract property details and amenities',
+                    icon: '📍'
+                });
+                suggestions.push({
+                    text: 'Get contact information for agents',
+                    icon: '📞'
+                });
+                helpMessage = 'Detected real estate site. Common objectives: listings, prices, agent contacts.';
+            }
+            // News / Blog sites
+            else if (url.match(/news|blog|article|press|media/i)) {
+                suggestions.push({
+                    text: 'Extract recent articles and headlines',
+                    icon: '📰'
+                });
+                suggestions.push({
+                    text: 'Get article content and publication dates',
+                    icon: '📅'
+                });
+                suggestions.push({
+                    text: 'Find author information and bylines',
+                    icon: '✍️'
+                });
+                helpMessage = 'Detected news/blog site. Common objectives: articles, content, authors.';
+            }
+            // Job boards
+            else if (url.match(/jobs|career|hiring|recruit|vacancy/i)) {
+                suggestions.push({
+                    text: 'Find job listings and requirements',
+                    icon: '💼'
+                });
+                suggestions.push({
+                    text: 'Extract salary ranges and benefits',
+                    icon: '💵'
+                });
+                suggestions.push({
+                    text: 'Get company information and locations',
+                    icon: '🏢'
+                });
+                helpMessage = 'Detected job board. Common objectives: listings, salaries, requirements.';
+            }
+            // Restaurant / Food sites
+            else if (url.match(/restaurant|menu|food|dining|delivery/i)) {
+                suggestions.push({
+                    text: 'Extract menu items and prices',
+                    icon: '🍽️'
+                });
+                suggestions.push({
+                    text: 'Find location and hours of operation',
+                    icon: '⏰'
+                });
+                suggestions.push({
+                    text: 'Get contact details and reservation info',
+                    icon: '📱'
+                });
+                helpMessage = 'Detected restaurant site. Common objectives: menu, prices, location.';
+            }
+            // Social media platforms
+            else if (url.match(/facebook|twitter|instagram|linkedin|youtube|tiktok|reddit/i)) {
+                suggestions.push({
+                    text: 'Extract posts and engagement metrics',
+                    icon: '📊'
+                });
+                suggestions.push({
+                    text: 'Find user profile information',
+                    icon: '👤'
+                });
+                suggestions.push({
+                    text: 'Get follower counts and statistics',
+                    icon: '📈'
+                });
+                helpMessage = 'Detected social media. Common objectives: posts, profiles, engagement.';
+            }
+            // Company / Corporate sites
+            else if (url.match(/about|company|corp|inc|ltd|contact/i)) {
+                suggestions.push({
+                    text: 'Find company contact information',
+                    icon: '📧'
+                });
+                suggestions.push({
+                    text: 'Extract company information and services',
+                    icon: 'ℹ️'
+                });
+                suggestions.push({
+                    text: 'Get team members and leadership info',
+                    icon: '👥'
+                });
+                helpMessage = 'Detected company site. Common objectives: contact info, services, team.';
+            }
+            // Generic suggestions
+            else {
+                suggestions.push({
+                    text: 'Extract all text content',
+                    icon: '📄'
+                });
+                suggestions.push({
+                    text: 'Find contact information',
+                    icon: '📞'
+                });
+                suggestions.push({
+                    text: 'Get product or service information',
+                    icon: 'ℹ️'
+                });
+                suggestions.push({
+                    text: 'Extract links and navigation structure',
+                    icon: '🔗'
+                });
+                helpMessage = 'No specific pattern detected. Here are some common objectives.';
+            }
+
+            // Show suggestions
+            if (suggestions.length > 0) {
+                suggestionsDiv.innerHTML = suggestions.map(s =>
+                    `<div onclick="selectSuggestion('${s.text.replace(/'/g, "\\'")}')" style="padding: 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor='white'">
+                        <span style="margin-right: 8px;">${s.icon}</span>
+                        <span style="color: #374151;">${s.text}</span>
+                    </div>`
+                ).join('');
+                suggestionsDiv.style.display = 'block';
+
+                if (helpMessage) {
+                    helpText.textContent = helpMessage;
+                    helpDiv.style.display = 'block';
+                }
+            }
+        }
+
+        // Select a suggestion
+        function selectSuggestion(text) {
+            const objectiveInput = document.getElementById('objective');
+            const suggestionsDiv = document.getElementById('objectiveSuggestions');
+
+            objectiveInput.value = text;
+            suggestionsDiv.style.display = 'none';
+            objectiveInput.focus();
+        }
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            const suggestionsDiv = document.getElementById('objectiveSuggestions');
+            const objectiveInput = document.getElementById('objective');
+            const urlInput = document.getElementById('company_name');
+
+            if (!suggestionsDiv.contains(e.target) && e.target !== objectiveInput && e.target !== urlInput) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
         // Handle infinite scroll checkbox
         function toggleScrollOptions() {
             const checkbox = document.getElementById('infiniteScroll');
             const scrollOptions = document.getElementById('scrollOptions');
-            
+
             if (checkbox.checked) {
                 scrollOptions.style.display = 'block';
             } else {
@@ -860,15 +1085,20 @@
                 viewResultsBtn.style.display = 'none';
             }
             progressContainer.classList.add('active');
-            button.innerHTML = '⏹️ Cancel Crawl';
-            button.onclick = cancelCrawl;
-            
+            button.innerHTML = '⏳ Crawling...';
+            button.disabled = true;
+
+            // Update progress text
+            if (progressText) {
+                progressText.textContent = 'Crawling website... This may take a few moments.';
+            }
+
             // Collect form data
             const formData = new FormData(document.getElementById('scrapeForm'));
             const data = Object.fromEntries(formData);
-            
+
             // Start crawl via API
-            fetch('/crawl/advanced', {
+            fetch('/crawl', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -877,75 +1107,91 @@
             })
             .then(response => response.json())
             .then(result => {
-                if (result.job_id) {
-                    trackProgress(result.job_id);
+                if (result.success && result.job_id) {
+                    // New async crawl - connect to SSE for progress
+                    trackProgressSSE(result.job_id);
+                } else if (result.error) {
+                    showError('Failed to crawl: ' + result.error);
+                    resetUI();
                 } else {
-                    showError('Failed to start crawl: ' + (result.error || 'Unknown error'));
+                    showError('Failed to start crawl: Unknown error');
+                    resetUI();
                 }
             })
             .catch(error => {
                 showError('Network error: ' + error.message);
+                resetUI();
             });
         }
         
-        let websocket = null;
+        let eventSource = null;
         let startTime = Date.now();
-        let fallbackInterval = null;
-        let completionTimeout = null;
-        
-        // Track crawling progress via WebSocket
-        function trackProgress(jobId) {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}/ws/progress/${jobId}`;
-            
-            websocket = new WebSocket(wsUrl);
-            
-            // Set up completion timeout (5 minutes of no updates)
-            resetCompletionTimeout(jobId);
-            
-            websocket.onopen = function(event) {
-                console.log('WebSocket connected for job:', jobId);
-            };
-            
-            websocket.onmessage = function(event) {
+
+        // Track crawling progress via SSE
+        function trackProgressSSE(jobId) {
+            const progressText = document.getElementById('progressText');
+
+            // Connect to SSE endpoint
+            eventSource = new EventSource(`/progress/${jobId}`);
+
+            eventSource.onmessage = function(event) {
                 try {
                     const data = JSON.parse(event.data);
-                    console.log('WebSocket message received:', data);
-                    
-                    if (data.type === 'progress') {
-                        updateProgress(data);
-                        resetCompletionTimeout(jobId);
-                        
-                        if (data.status === 'completed') {
-                            console.log('Crawl completed, showing results...');
-                            websocket.close();
-                            clearTimeouts();
-                            showResults(jobId);
-                        } else if (data.status === 'failed') {
-                            console.log('Crawl failed:', data.error);
-                            websocket.close();
-                            clearTimeouts();
-                            showError('Crawl failed: ' + (data.error || 'Unknown error'));
-                        }
+                    console.log('SSE message received:', data);
+
+                    // Update progress text with current URL
+                    if (data.current_url && progressText) {
+                        progressText.textContent = data.progress_text || `Crawling: ${data.current_url}`;
+                    }
+
+                    // Check if crawl is complete
+                    if (data.status === 'completed') {
+                        console.log('Crawl completed, fetching results...');
+                        eventSource.close();
+                        fetchResults(jobId);
+                    } else if (data.status === 'error') {
+                        console.log('Crawl failed:', data.error);
+                        eventSource.close();
+                        showError('Crawl failed: ' + (data.error || 'Unknown error'));
+                        resetUI();
                     }
                 } catch (error) {
-                    console.error('Error parsing WebSocket message:', error);
+                    console.error('Error parsing SSE message:', error);
                 }
             };
-            
-            websocket.onerror = function(event) {
-                console.error('WebSocket error:', event);
-                // Fallback to polling if WebSocket fails
-                trackProgressFallback(jobId);
+
+            eventSource.onerror = function(event) {
+                console.error('SSE error:', event);
+                eventSource.close();
+                showError('Connection to server lost');
+                resetUI();
             };
-            
-            websocket.onclose = function(event) {
-                console.log('WebSocket closed for job:', jobId);
-                // Start fallback polling if not manually closed
-                if (event.code !== 1000) {
-                    setTimeout(() => trackProgressFallback(jobId), 1000);
-                }
-            };
+        }
+
+        // Fetch final results
+        function fetchResults(jobId) {
+            const progressText = document.getElementById('progressText');
+
+            if (progressText) {
+                progressText.textContent = 'Processing results...';
+            }
+
+            fetch(`/result/${jobId}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success || result.data) {
+                        displayResults(result);
+                    } else if (result.error) {
+                        showError('Failed to get results: ' + result.error);
+                    } else {
+                        showError('Failed to get results: Unknown error');
+                    }
+                    resetUI();
+                })
+                .catch(error => {
+                    showError('Error fetching results: ' + error.message);
+                    resetUI();
+                });
         }
         
         // Reset the completion timeout
@@ -1047,20 +1293,17 @@
             progressSpeed.textContent = `Speed: ${speed} pages/min`;
         }
         
-        // Cancel crawl
-        function cancelCrawl() {
-            clearTimeouts();
-            
-            if (websocket) {
-                websocket.close();
-                websocket = null;
+        // Reset UI after crawl completes or fails
+        function resetUI() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
             }
-            
+
             const button = document.getElementById('submitBtn');
             const progressContainer = document.getElementById('progressContainer');
-            
+
             button.innerHTML = '🚀 Start Scraping';
-            button.onclick = null;
             button.disabled = false;
             progressContainer.classList.remove('active');
         }
@@ -1070,12 +1313,12 @@
             const errorDiv = document.createElement('div');
             errorDiv.className = 'alert alert-error';
             errorDiv.innerHTML = '<strong>Error:</strong> ' + message;
-            
+
             const content = document.querySelector('.content');
             content.insertBefore(errorDiv, content.firstChild);
-            
-            // Reset button
-            cancelCrawl();
+
+            // Reset UI
+            resetUI();
         }
         
         let lastJobId = null;
@@ -1102,7 +1345,103 @@
                 showError('No recent crawl results found');
             }
         }
-        
+
+        // Display crawl results
+        function displayResults(result) {
+            // Remove any existing results
+            const existingResults = document.querySelector('.results');
+            if (existingResults) {
+                existingResults.remove();
+            }
+
+            // Create results container
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'results';
+            resultsDiv.style.marginTop = '2rem';
+
+            // Success message
+            const successAlert = document.createElement('div');
+            successAlert.className = 'alert alert-success';
+            successAlert.innerHTML = '✅ Successfully crawled the website!';
+            resultsDiv.appendChild(successAlert);
+
+            // URLs crawled
+            if (result.urls && result.urls.length > 0) {
+                const urlsSection = document.createElement('div');
+                urlsSection.style.marginTop = '1.5rem';
+                urlsSection.innerHTML = `<h3>🔗 URLs Crawled (${result.urls.length})</h3>`;
+                const urlsList = document.createElement('ul');
+                urlsList.style.listStyle = 'disc';
+                urlsList.style.paddingLeft = '2rem';
+                result.urls.slice(0, 10).forEach(url => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="${url}" target="_blank" style="color: #4F46E5;">${url}</a>`;
+                    urlsList.appendChild(li);
+                });
+                if (result.urls.length > 10) {
+                    const moreItem = document.createElement('li');
+                    moreItem.textContent = `... and ${result.urls.length - 10} more`;
+                    urlsList.appendChild(moreItem);
+                }
+                urlsSection.appendChild(urlsList);
+                resultsDiv.appendChild(urlsSection);
+            }
+
+            // Data extracted
+            if (result.data) {
+                const dataSection = document.createElement('div');
+                dataSection.style.marginTop = '1.5rem';
+                dataSection.innerHTML = '<h3>📊 Extracted Data</h3>';
+                const pre = document.createElement('pre');
+                pre.style.background = '#f3f4f6';
+                pre.style.padding = '1rem';
+                pre.style.borderRadius = '0.5rem';
+                pre.style.overflow = 'auto';
+                pre.style.maxHeight = '600px';
+                pre.textContent = JSON.stringify(result.data, null, 2);
+                dataSection.appendChild(pre);
+                resultsDiv.appendChild(dataSection);
+            }
+
+            // Download button
+            if (result.filename) {
+                const downloadSection = document.createElement('div');
+                downloadSection.style.marginTop = '1.5rem';
+                const downloadBtn = document.createElement('a');
+                downloadBtn.href = `/download/${result.filename}`;
+                downloadBtn.className = 'btn';
+                downloadBtn.style.background = '#059669';
+                downloadBtn.style.color = 'white';
+                downloadBtn.style.textDecoration = 'none';
+                downloadBtn.style.display = 'inline-block';
+                downloadBtn.innerHTML = '💾 Download Results (JSON)';
+                downloadSection.appendChild(downloadBtn);
+                resultsDiv.appendChild(downloadSection);
+            }
+
+            // Insert results after the form
+            const form = document.getElementById('scrapeForm');
+            form.parentNode.insertBefore(resultsDiv, form.nextSibling);
+
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Reset UI after crawl
+        function resetUI() {
+            const button = document.getElementById('submitBtn');
+            const progressContainer = document.getElementById('progressContainer');
+
+            if (button) {
+                button.innerHTML = '🚀 Start Crawl';
+                button.disabled = false;
+            }
+
+            if (progressContainer) {
+                progressContainer.classList.remove('active');
+            }
+        }
+
         // Initialize default mode on page load
         document.addEventListener('DOMContentLoaded', function() {
             selectMode('single');

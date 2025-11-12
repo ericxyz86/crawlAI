@@ -1,109 +1,113 @@
-# Web Scraper App
+# Improved Web Crawler
 
-A modern web scraping application built with FastAPI and Crawl4AI that allows users to scrape websites and extract content in markdown format.
+A comprehensive web crawler that extracts structured information from websites based on user objectives. This tool works with company names, domains, or specific URLs across any industry.
 
 ## Features
 
-- 🕷️ **Web Scraping**: Scrape any website URL using Crawl4AI
-- 📝 **Markdown Output**: Clean, formatted markdown content
-- 🎨 **Modern UI**: Beautiful, responsive web interface
-- ⚡ **Fast Processing**: Optimized for speed with async operations
-- 🛡️ **Error Handling**: Comprehensive error handling and validation
-- 📊 **Content Stats**: Word count, links, and image statistics
+- **Generic Information Extraction**: Works for any industry or domain, not just automotive
+- **Objective-Driven Crawling**: Focuses on retrieving information relevant to user queries
+- **Smart URL Selection**: Uses AI to select the most relevant pages to crawl
+- **Adaptive Content Extraction**: Tailors content extraction to the user's specific objective
+- **Dual Input Modes**:
+  - Company name search: Finds and crawls relevant websites via search API
+  - Direct URL/domain input: Focuses on exploring that specific website
 
-## Installation
+## Setup
 
-1. Install dependencies:
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd webcrawler
+```
+
+2. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Set up Crawl4AI:
-```bash
-crawl4ai-setup
+4. Create a `.env` file with the following API keys:
 ```
-
-3. Copy environment variables:
-```bash
-cp .env.example .env
+DEEPSEEK_API_KEY=your_deepseek_api_key
+SERP_API_KEY=your_serpapi_key
+FIRECRAWL_API_KEY=your_firecrawl_api_key
 ```
 
 ## Usage
 
-### Running the Application
+### Command Line Interface
 
-Start the server:
+Run the crawler from the command line:
+
+```bash
+python improved_web_crawler.py
+```
+
+You'll be prompted to enter:
+- Company name or URL to crawl
+- Objective (what information you want to find)
+
+### Web Interface
+
+Start the Flask web server:
+
 ```bash
 python app.py
 ```
 
-Or using uvicorn:
+Access the web interface at http://127.0.0.1:5001/
+
+### API Usage
+
+Make a POST request to the `/crawl` endpoint:
+
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+curl -X POST http://127.0.0.1:5001/crawl \
+  -H "Content-Type: application/json" \
+  -d '{"company_name": "example.com", "objective": "find pricing information"}'
 ```
 
-### Web Interface
-
-1. Open your browser and go to `http://localhost:8000`
-2. Enter a URL you want to scrape
-3. Click "Scrape Website" 
-4. View the extracted content in markdown format
-
-### API Endpoints
-
-#### POST `/scrape`
-Scrape a website URL programmatically.
-
-**Request body:**
-```json
-{
-  "url": "https://example.com",
-  "word_count_threshold": 10,
-  "content_filter_threshold": 0.48,
-  "css_selector": null,
-  "wait_for": 3000,
-  "page_timeout": 30000,
-  "excluded_tags": ["nav", "footer", "aside", "script", "style"]
-}
-```
-
-**Response:**
+Response format:
 ```json
 {
   "success": true,
-  "url": "https://example.com",
-  "title": "Example Domain",
-  "description": "This domain is for use in illustrative examples...",
-  "markdown": "# Example Domain\n\nThis domain is for use in illustrative examples in documents...",
-  "links": [...],
-  "images": [...],
-  "metadata": {...},
-  "word_count": 45
+  "urls": ["https://example.com/pricing", "https://example.com/products"],
+  "data": {
+    "entity_overview": "...",
+    "products_and_services": [...],
+    "contact_information": {...},
+    "objective_related_information": {...}
+  },
+  "metadata": {
+    "crawl_time": "2025-05-05T12:00:00",
+    "execution_time_seconds": 8.45,
+    "objective": "find pricing information",
+    "entity_name": "example.com",
+    "input_type": "url"
+  },
+  "filename": "crawl_results_20250505_120000.json"
 }
 ```
 
-#### GET `/health`
-Health check endpoint.
+## Code Structure
 
-## Configuration
+- **WebCrawler**: Main class that orchestrates the crawling process
+- **ConfigManager**: Handles configuration and API key management
+- **SearchEngine**: Handles search operations via search APIs
+- **URLProcessor**: Manages URL selection, validation, and discovery
+- **ContentExtractor**: Extracts and structures content from web pages
 
-The application can be configured through environment variables:
+## Enhancements Over Original Implementation
 
-- `APP_ENV`: Application environment (development/production)
-- `LOG_LEVEL`: Logging level (DEBUG/INFO/WARNING/ERROR)
-- `CRAWL4AI_HEADLESS`: Run browser in headless mode (true/false)
-- `CRAWL4AI_BROWSER_TYPE`: Browser type (chromium/firefox/webkit)
-- `HOST`: Server host (default: 0.0.0.0)
-- `PORT`: Server port (default: 8000)
-
-## Technologies Used
-
-- **FastAPI**: Modern, fast web framework for building APIs
-- **Crawl4AI**: AI-powered web crawling and scraping
-- **Jinja2**: Template engine for HTML rendering
-- **Uvicorn**: ASGI server for running the application
-- **Pydantic**: Data validation and settings management
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
+1. **Industry-Agnostic**: Removed automotive-specific code for true generic functionality
+2. **Improved Architecture**: Modular, class-based structure with clear separation of concerns
+3. **Better Error Handling**: Comprehensive logging and robust error recovery
+4. **Enhanced URL Discovery**: Smarter internal link discovery focused on objective relevance
+5. **Security Improvements**: Better API key management and safer request handling
+6. **Performance Optimizations**: Parallel processing and efficient content extraction
+7. **More Robust Content Extraction**: Pattern generation based on user objectives
