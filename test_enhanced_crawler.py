@@ -26,7 +26,7 @@ def test_enhanced_crawler():
     try:
         # Make request to the Flask API
         response = requests.post(
-            "http://127.0.0.1:5001/crawl",
+            "http://127.0.0.1:5002/crawl",
             json=test_data,
             timeout=300  # 5 minutes timeout
         )

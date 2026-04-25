@@ -116,7 +116,7 @@ For backward compatibility, when only one site/category is found:
 ### Basic Multi-Site Request
 
 ```bash
-curl -X POST http://localhost:5001/crawl \
+curl -X POST http://localhost:5002/crawl \
   -H "Content-Type: application/json" \
   -d '{
     "company_name": "Apple Watch Philippines",
@@ -128,7 +128,7 @@ curl -X POST http://localhost:5001/crawl \
 ### Legacy Compatible Request
 
 ```bash
-curl -X POST http://localhost:5001/crawl \
+curl -X POST http://localhost:5002/crawl \
   -H "Content-Type: application/json" \
   -d '{
     "company_name": "Apple Watch Philippines",

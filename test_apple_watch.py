@@ -26,7 +26,7 @@ def test_apple_watch_pricing():
     try:
         # Make request to the Flask API
         response = requests.post(
-            "http://127.0.0.1:5001/crawl",
+            "http://127.0.0.1:5002/crawl",
             json=test_data,
             timeout=300  # 5 minutes timeout
         )
@@ -127,7 +127,7 @@ def test_direct_apple_url():
     
     try:
         response = requests.post(
-            "http://127.0.0.1:5001/crawl",
+            "http://127.0.0.1:5002/crawl",
             json=test_data,
             timeout=300
         )
@@ -158,7 +158,7 @@ def test_direct_apple_url():
 
 if __name__ == "__main__":
     print("🍎 Apple Watch Pricing Test Suite")
-    print("Make sure the Flask app is running on port 5001")
+    print("Make sure the Flask app is running on port 5002")
     print()
     
     # Test 1: Search-based approach

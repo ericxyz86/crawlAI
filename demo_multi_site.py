@@ -230,17 +230,17 @@ def show_api_examples():
     print("🚀 Flask API Examples:")
     print("\n1. Multi-site crawling (default):")
     print("""
-curl -X POST http://localhost:5001/crawl \\
+curl -X POST http://localhost:5002/crawl \\
   -H "Content-Type: application/json" \\
   -d '{
     "company_name": "Apple Watch Philippines",
     "objective": "find pricing and availability"
   }'
 """)
-    
+
     print("\n2. Legacy compatibility mode:")
     print("""
-curl -X POST http://localhost:5001/crawl \\
+curl -X POST http://localhost:5002/crawl \\
   -H "Content-Type: application/json" \\
   -d '{
     "company_name": "Apple Watch",

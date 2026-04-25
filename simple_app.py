@@ -26,6 +26,6 @@ def test_api():
     })
 
 if __name__ == "__main__":
-    logger.info("Starting simple Flask server on http://0.0.0.0:5001")
+    logger.info("Starting simple Flask server on http://0.0.0.0:5002")
     # Run the app with explicit host and port, binding to all interfaces
-    app.run(debug=True, port=5001, host="0.0.0.0")
+    app.run(debug=True, port=5002, host="0.0.0.0")

@@ -239,7 +239,7 @@ OPENAI_API_KEY=your_openai_key  # Fallback
 ### Development Commands
 ```bash
 # Backend
-python app.py  # Start Flask server on port 5001
+python app.py  # Start Flask server on port 5002
 
 # Frontend (if needed)
 cd frontend && npm run dev  # Port 5173

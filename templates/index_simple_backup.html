@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Web Crawler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Optional: Style scrollbar for the preview */
+        #dataPreview::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        #dataPreview::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        #dataPreview::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        #dataPreview::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-12">
+        <h1 class="text-4xl font-bold text-center mb-10 text-gray-800">AI Web Crawler</h1>
+
+        <!-- Input Form Card -->
+        <div class="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-8 mb-10">
+             <h2 class="text-2xl font-semibold text-gray-700 mb-6 text-center">Enter Crawl Details</h2>
+            <form id="crawlForm" class="space-y-6">
+                <div>
+                    <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Company Name or URL</label>
+                    <div class="relative rounded-md shadow-sm">
+                         <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                             <!-- Heroicon: building-office-2 -->
+                             <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M4 1a1 1 0 00-1 1v1.757l.293.293A.75.75 0 013.5 4.5V6a1 1 0 001 1h10a1 1 0 001-1V4.5a.75.75 0 01.207-.53l.293-.293V2a1 1 0 00-1-1H4zm0 2.5V18a1 1 0 001 1h10a1 1 0 001-1V3.5a1 1 0 00-.293-.707L14.414 2H5.586L4.293 2.793A1 1 0 004 3.5zM8 6a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 6zm4 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0112 6zm-4 4a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 10zm4 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 014 10z" clip-rule="evenodd" />
+                             </svg>
+                         </div>
+                        <input type="text" name="company" id="company" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., Example Inc or https://example.com">
+                    </div>
+                </div>
+                <div>
+                    <label for="objective" class="block text-sm font-medium text-gray-700 mb-1">Search Objective</label>
+                     <div class="relative rounded-md shadow-sm">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                            <!-- Heroicon: AdjustmentsHorizontal -->
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />
+                            </svg>
+                        </div>
+                        <input type="text" id="objective" name="objective" required class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., Find product pricing">
+                     </div>
+                </div>
+                <div class="mb-3">
+                    <label for="llm" class="form-label">LLM Model</label>
+                    <select class="form-select" id="llm" name="llm">
+                        <option value="o4-mini">o4-mini (compatibility issues with some OpenAI API versions)</option>
+                        <option value="R1" selected>R1</option>
+                    </select>
+                    <small class="text-muted">The R1 model is recommended for better compatibility</small>
+                </div>
+                <button type="submit" class="w-full flex justify-center items-center space-x-2 bg-indigo-600 text-white py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    <!-- Heroicon: Magnifying Glass -->
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Start Crawling</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden text-center py-6">
+            <div class="flex justify-center items-center space-x-3">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <span class="text-lg text-gray-600">Crawling websites, please wait...</span>
+            </div>
+        </div>
+
+        <!-- Results Section Card -->
+        <div id="results" class="hidden max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800 border-b pb-3">Crawling Results</h2>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-700 mb-3">Crawled URLs:</h3>
+                    <ul id="urlList" class="list-disc list-inside text-gray-600 space-y-1 pl-4 text-sm">
+                        <!-- URLs will be populated here -->
+                    </ul>
+                </div>
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-medium text-gray-700 mb-3">Extracted Data Preview:</h3>
+                    <pre id="dataPreview" class="bg-gray-50 p-4 rounded-md text-sm overflow-auto max-h-96 border border-gray-200 text-gray-800"></pre>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 pt-6 border-t">
+                    <button id="downloadBtn" class="flex-1 inline-flex justify-center items-center space-x-2 bg-green-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
+                        <!-- Heroicon: ArrowDownTray -->
+                         <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1.707-7.293a1 1 0 00-1.414-1.414L11 10.586V6.5a1 1 0 10-2 0v4.086l-.293-.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2z" clip-rule="evenodd" />
+                         </svg>
+                        <span>Download Results</span>
+                    </button>
+                    <button id="copyBtn" class="flex-1 inline-flex justify-center items-center space-x-2 bg-blue-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                         <!-- Initial Icon: DocumentDuplicate -->
+                         <svg id="copyIconDefault" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                         </svg>
+                         <!-- Success Icon: Check (hidden initially) -->
+                         <svg id="copyIconSuccess" class="h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                         </svg>
+                         <span id="copyBtnText">Copy Results</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message Card -->
+        <div id="error" class="hidden max-w-lg mx-auto mt-8 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md" role="alert">
+            <div class="flex">
+                <div class="py-1">
+                    <!-- Heroicon: ExclamationTriangle -->
+                    <svg class="h-6 w-6 text-red-500 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-bold">Error</p>
+                    <p id="errorMessage" class="text-sm"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('crawlForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Hide previous results and errors
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+
+            // Show loading indicator
+            document.getElementById('loading').classList.remove('hidden');
+
+            const formData = {
+                company_name: document.getElementById('company').value,
+                objective: document.getElementById('objective').value,
+                llm: document.getElementById('llm').value
+            };
+
+            try {
+                const response = await fetch('/crawl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // Use the error message from the server response if available
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                }
+
+                if (data.success) {
+                    // Display results
+                    const urlList = document.getElementById('urlList');
+                    // Clear previous list items
+                    urlList.innerHTML = '';
+                    if (data.urls && data.urls.length > 0) {
+                         data.urls.forEach(url => {
+                             const li = document.createElement('li');
+                             // Create an anchor tag for clickable links
+                             const a = document.createElement('a');
+                             a.href = url;
+                             a.textContent = url;
+                             a.target = '_blank'; // Open in new tab
+                             a.rel = 'noopener noreferrer';
+                             a.className = 'text-blue-600 hover:text-blue-800 hover:underline break-all';
+                             li.appendChild(a);
+                             urlList.appendChild(li);
+                         });
+                    } else {
+                        urlList.innerHTML = '<li>No specific URLs were crawled or returned.</li>';
+                    }
+
+
+                    document.getElementById('dataPreview').textContent = JSON.stringify(data.data, null, 2);
+
+                    // Setup download button
+                    const downloadBtn = document.getElementById('downloadBtn');
+                     // Remove previous listener if exists to prevent multiple downloads
+                     const newDownloadBtn = downloadBtn.cloneNode(true);
+                     downloadBtn.parentNode.replaceChild(newDownloadBtn, downloadBtn);
+                     newDownloadBtn.onclick = () => window.location.href = `/download/${data.filename}`;
+
+
+                    // Setup copy button
+                    const copyBtn = document.getElementById('copyBtn');
+                    const copyBtnText = document.getElementById('copyBtnText');
+                    const copyIconDefault = document.getElementById('copyIconDefault');
+                    const copyIconSuccess = document.getElementById('copyIconSuccess');
+
+                    // Remove previous listener to prevent multiple bindings
+                    const newCopyBtn = copyBtn.cloneNode(true);
+                    // Important: Re-fetch child elements for the new node
+                    const newCopyBtnText = newCopyBtn.querySelector('#copyBtnText');
+                    const newCopyIconDefault = newCopyBtn.querySelector('#copyIconDefault');
+                    const newCopyIconSuccess = newCopyBtn.querySelector('#copyIconSuccess');
+                    copyBtn.parentNode.replaceChild(newCopyBtn, copyBtn);
+
+
+                    newCopyBtn.onclick = async () => {
+                        try {
+                            await navigator.clipboard.writeText(JSON.stringify(data.data, null, 2));
+
+                            // Show temporary success message & icon change
+                            newCopyBtnText.textContent = 'Copied!';
+                            newCopyIconDefault.classList.add('hidden');
+                            newCopyIconSuccess.classList.remove('hidden');
+                            newCopyBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                            newCopyBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+
+                            setTimeout(() => {
+                                newCopyBtnText.textContent = 'Copy Results';
+                                newCopyIconDefault.classList.remove('hidden');
+                                newCopyIconSuccess.classList.add('hidden');
+                                newCopyBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                                newCopyBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                            }, 2000);
+                        } catch (err) {
+                            console.error('Failed to copy:', err);
+                            alert('Failed to copy results. Check browser permissions or try again.');
+                        }
+                    };
+
+                    document.getElementById('results').classList.remove('hidden');
+                } else {
+                    // Handle cases where success is false but response was ok (shouldn't happen with current backend)
+                     throw new Error(data.error || 'An unknown error occurred during crawling.');
+                }
+            } catch (error) {
+                console.error("Crawl Error:", error); // Log the error for debugging
+                document.getElementById('errorMessage').textContent = error.message || 'An unexpected error occurred. Please check the console.';
+                document.getElementById('error').classList.remove('hidden');
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

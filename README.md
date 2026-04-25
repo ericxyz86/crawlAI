@@ -60,14 +60,14 @@ Start the Flask web server:
 python app.py
 ```
 
-Access the web interface at http://127.0.0.1:5001/
+Access the web interface at http://127.0.0.1:5002/
 
 ### API Usage
 
 Make a POST request to the `/crawl` endpoint:
 
 ```bash
-curl -X POST http://127.0.0.1:5001/crawl \
+curl -X POST http://127.0.0.1:5002/crawl \
   -H "Content-Type: application/json" \
   -d '{"company_name": "example.com", "objective": "find pricing information"}'
 ```
